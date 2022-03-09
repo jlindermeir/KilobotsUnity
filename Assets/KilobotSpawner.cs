@@ -10,10 +10,15 @@ public class KilobotSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Spawn moving Kilobots
         for (int i = 0; i < n_bots; i++)
         {
             Quaternion rotation = Quaternion.AngleAxis(Random.value * 360, Vector3.forward);
             Instantiate(kilobot, Random.insideUnitCircle * 4, rotation);
         }
+        
+        // Spawn fixed Kilobot
+        GameObject fixedKilobot = Instantiate(kilobot, Vector3.zero, Quaternion.identity) as GameObject;
+        fixedKilobot.GetComponent<KilobotMovement>().state = KilobotMovement.StateEnum.FixedPosition;
     }
 }

@@ -1,21 +1,31 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class KilobotMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
-
-    private float forwardForce = 1f;
-    private float rayDistance = 0.5f;
-    private float radius = 0.251f;
-    private float torque = 0.2f;
-
-    private static List<float> rayAngles = new List<float>()
+    public SpriteRenderer sr;
+    
+    public enum StateEnum
     {
-        -15, 0, 15
+        Movement,
+        FixedPosition
+    }
+    public StateEnum state = StateEnum.Movement;
+
+    private Dictionary<StateEnum, Color> stateColor = new Dictionary<StateEnum, Color>()
+    {
+        {StateEnum.Movement, Color.red},
+        {StateEnum.FixedPosition, Color.green}
     };
+
+    private static float forwardForce = 1f;
+    private static float communicationRadius = 1f;
+    private static float stickRadius = 0.25f;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,35 +34,57 @@ public class KilobotMovement : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+    {   
+        UpdateColor();
+        
+        // Communicate with surrounding kilobots
+        Collider2D[] circleHits = Physics2D.OverlapCircleAll(transform.position, communicationRadius);
+
+        var kilobotInfo = new List<(float distance, StateEnum state, Vector2 position)>();
+        foreach (var hit in circleHits)
+        {
+            if (!hit.CompareTag("Kilobot"))
+            {
+                continue;
+            }
+            
+            Debug.DrawLine(transform.position, hit.transform.position);
+
+            Vector2 position = hit.transform.position - transform.position;
+            float distance = position.magnitude;
+            StateEnum kilobotState = hit.gameObject.GetComponent<KilobotMovement>().state;
+            
+            kilobotInfo.Add((distance, kilobotState, position));
+        }
+        
+        // State specific behaviour
+        switch (state)
+        {
+            case StateEnum.Movement:
+                if (kilobotInfo.Any())
+                {
+                    foreach (var kilobot in kilobotInfo)
+                    {
+                        if (kilobot.state == StateEnum.FixedPosition)
+                        {
+                            if (kilobot.distance < stickRadius)
+                            {
+                                state = StateEnum.FixedPosition;
+                                return;
+                            }
+                            rb.AddForce(kilobot.position.normalized * forwardForce);
+                        }
+                    }
+                }
+                rb.AddForce(Random.insideUnitCircle * forwardForce);
+                break;
+            case StateEnum.FixedPosition:
+                break;
+        }
+    }
+
+    void UpdateColor()
     {
-        rb.AddForce(transform.up * forwardForce);
-        
-        // Raycast forward
-        var hitList = new List<(bool hasHit, float distance)>();
-        
-        foreach (float angle in rayAngles)
-        {
-            Vector3 direction = Quaternion.Euler(0, 0, angle) * transform.up;
-            Vector3 origin = transform.position + (transform.up * radius);
-        
-            RaycastHit2D hit = Physics2D.Raycast(origin, direction, rayDistance);
-            Color rayColor = (hit.collider != null) ? Color.red : Color.green;
-            Debug.DrawRay(origin, direction * rayDistance, rayColor);
-
-            if (hit.collider != null)
-            {
-                hitList.Add((true, hit.distance));
-            }
-            else
-            {
-                hitList.Add((false, float.PositiveInfinity));
-            }
-        }
-
-        if (hitList[1].hasHit)
-        {
-            float signedTorque = (hitList[0].distance > hitList[2].distance) ? -torque : torque;
-            rb.AddTorque(signedTorque);
-        }
+        sr.color = stateColor[state];
     }
 }
