@@ -5,7 +5,7 @@ using UnityEngine;
 public class KilobotSpawner : MonoBehaviour
 {
     public Object kilobot;
-    private int n_bots = 150;
+    private int n_bots = 500;
     
     // Start is called before the first frame update
     void Start()
@@ -19,6 +19,5 @@ public class KilobotSpawner : MonoBehaviour
         
         // Spawn fixed Kilobot
         GameObject fixedKilobot = Instantiate(kilobot, Vector3.zero, Quaternion.identity) as GameObject;
-        fixedKilobot.GetComponent<KilobotMovement>().state = KilobotMovement.StateEnum.FixedPosition;
     }
 }

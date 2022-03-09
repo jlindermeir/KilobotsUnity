@@ -427,6 +427,10 @@ MonoBehaviour:
   rb: {fileID: 1785355560}
   sr: {fileID: 1785355558}
   state: 0
+  position: {x: NaN, y: NaN}
+  forwardForce: 0.1
+  communicationRadius: 1.05
+  stickRadius: 1
 --- !u!58 &1785355562
 CircleCollider2D:
   m_ObjectHideFlags: 0

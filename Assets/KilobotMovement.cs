@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class KilobotMovement : MonoBehaviour
         FixedPosition
     }
     public StateEnum state = StateEnum.Movement;
+    public Vector2 position = new Vector2(float.NaN, float.NaN);
 
     private Dictionary<StateEnum, Color> stateColor = new Dictionary<StateEnum, Color>()
     {
@@ -21,15 +23,15 @@ public class KilobotMovement : MonoBehaviour
         {StateEnum.FixedPosition, Color.green}
     };
 
-    private static float forwardForce = 1f;
-    private static float communicationRadius = 1f;
-    private static float stickRadius = 0.25f;
+    public float forwardForce = 0.3f;
+    public float communicationRadius = 0.3f;
+    public float stickRadius = 0.15f;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        rb.AddForce(Random.insideUnitCircle * forwardForce * 10);
     }
 
     // Update is called once per frame
@@ -52,35 +54,30 @@ public class KilobotMovement : MonoBehaviour
 
             Vector2 position = hit.transform.position - transform.position;
             float distance = position.magnitude;
-            StateEnum kilobotState = hit.gameObject.GetComponent<KilobotMovement>().state;
-            
-            kilobotInfo.Add((distance, kilobotState, position));
+            KilobotMovement km = hit.gameObject.GetComponent<KilobotMovement>();
+            kilobotInfo.Add((distance, km.state, position));
         }
+        
+        // Estimate position
+        // TODO: actually implement this distributively
+        Vector2 estimatedPosition = transform.position;
         
         // State specific behaviour
         switch (state)
         {
             case StateEnum.Movement:
-                if (kilobotInfo.Any())
+                foreach (var kilobot in kilobotInfo)
                 {
-                    foreach (var kilobot in kilobotInfo)
-                    {
-                        if (kilobot.state == StateEnum.FixedPosition)
-                        {
-                            if (kilobot.distance < stickRadius)
-                            {
-                                state = StateEnum.FixedPosition;
-                                return;
-                            }
-                            rb.AddForce(kilobot.position.normalized * forwardForce);
-                        }
-                    }
+                    float force = stickRadius - kilobot.distance;
+                    rb.AddForce(-kilobot.position.normalized * force);
                 }
-                rb.AddForce(Random.insideUnitCircle * forwardForce);
+                    
                 break;
             case StateEnum.FixedPosition:
                 break;
         }
+        
+        rb.AddForce(Random.insideUnitCircle * forwardForce);
     }
 
     void UpdateColor()
