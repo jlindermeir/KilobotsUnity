@@ -5,7 +5,7 @@ using UnityEngine;
 public class KilobotSpawner : MonoBehaviour
 {
     public Object kilobot;
-    private int n_bots = 500;
+    private int n_bots = 25;
     
     // Start is called before the first frame update
     void Start()
