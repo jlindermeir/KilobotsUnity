@@ -8,6 +8,7 @@ public class KilobotMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
     public SpriteRenderer sr;
+    public TextMesh tm;
     
     public float forwardForce = 0.3f;
     public float communicationRadius = 0.3f;
@@ -63,11 +64,12 @@ public class KilobotMovement : MonoBehaviour
         CurrentMessage = newMessage;
         
         // Update the color according to the state
-        UpdateColor();
+        UpdateSprite();
     }
 
-    void UpdateColor()
+    void UpdateSprite()
     {
         sr.color = Agent.GetStateColor();
+        tm.text = Agent.Gradient.ToString();
     }
 }

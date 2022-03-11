@@ -14,7 +14,7 @@ public class KilobotAgent
     }
     public State CurrentState;
     public Vector2 PositionEstimate;
-    public int Gradient;
+    public int Gradient = -1;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
     {
