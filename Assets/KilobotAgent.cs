@@ -20,6 +20,8 @@ public class KilobotAgent
     public bool GradientSeed = false;
 
     private const float GradientDistance = 3f;
+    private const float EdgeDistance = 1.75f;
+    private float prevNearestNeighborDistance = float.MaxValue;
     private int StartupTime = 15;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
@@ -41,7 +43,7 @@ public class KilobotAgent
         return _stateColor[CurrentState];
     }
 
-    public Tuple<Vector2, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
+    public Tuple<Vector2, float, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
     {
         // Update the gradient value
         UpdateGradient(messageList);
@@ -51,21 +53,23 @@ public class KilobotAgent
         
         // Determine the movement within the state machine
         Vector2 motionDirection = Vector2.zero;
+        float torque = 0f;
         switch (CurrentState)
         {
             case State.Start:
-                motionDirection = ProcessStart();
+                (motionDirection, torque) = ProcessStart();
                 break;
             case State.WaitToMove:
-                motionDirection = ProcessWaitToMove(messageList);
+                (motionDirection, torque) = ProcessWaitToMove(messageList);
                 break;
             case State.MoveWhileOutside:
+                (motionDirection, torque) = ProcessMoveOutside(messageList);
                 break;
             case State.JoinedShape:
                 break;
         }
         
-        return new Tuple<Vector2, KilobotMessage>(motionDirection, GetMessage());
+        return new Tuple<Vector2, float, KilobotMessage>(motionDirection, torque, GetMessage());
     }
 
     public KilobotMessage GetMessage()
@@ -136,7 +140,7 @@ public class KilobotAgent
         }
     }
 
-    private Vector2 ProcessStart()
+    private Tuple<Vector2, float> ProcessStart()
     {
         if (StartupTime < 0)
         {
@@ -146,19 +150,20 @@ public class KilobotAgent
         {
             StartupTime--;
         }
-        return Vector2.zero;
+
+        return new Tuple<Vector2, float>(Vector2.zero, 0);
     }
 
-    private Vector2 ProcessWaitToMove(List<Tuple<float, KilobotMessage>> messageList)
+    private Tuple<Vector2, float> ProcessWaitToMove(List<Tuple<float, KilobotMessage>> messageList)
     {
-        Vector2 direction = Vector2.zero;
+        Tuple<Vector2, float> action = new Tuple<Vector2, float>(Vector2.zero, 0);
         
         // Check if other visible bots are moving. If so, stay in this state
         foreach ((_, KilobotMessage message) in messageList)
         {
             if (message.State == State.MoveWhileInside | message.State == State.MoveWhileOutside)
             {
-                return direction;
+                return action;
             }
         }
         
@@ -177,23 +182,59 @@ public class KilobotAgent
         if (maximumGradient < Gradient)
         {
             CurrentState = State.MoveWhileOutside;
-            return direction;
+            return action;
         }
         
         // If our gradient is equal the highest one, check who has the higher random ID
         if (maximumGradient == Gradient)
         {
-            foreach ((float _, KilobotMessage message) in messageList)
+            foreach ((_, KilobotMessage message) in messageList)
             {
                 if (message.Gradient == maximumGradient && message.ID > GetHashCode())
                 {
-                    return direction;
+                    return action;
                 }
             }
             CurrentState = State.MoveWhileOutside;
         }
 
-        return direction;
+        return action;
     }
-    
+
+    private Tuple<Vector2, float> ProcessMoveOutside(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        return FollowEdge(messageList);
+    }
+
+    private Tuple<Vector2, float> FollowEdge(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        float currentNearestNeighborDistance = float.MaxValue;
+        foreach ((float distance, _) in messageList)
+        {
+            if (distance < currentNearestNeighborDistance)
+            {
+                currentNearestNeighborDistance = distance;
+            }
+        }
+
+        float torque = 0f; 
+        if (currentNearestNeighborDistance < EdgeDistance)
+        {
+            if (prevNearestNeighborDistance > currentNearestNeighborDistance)
+            {
+                torque = 1f;
+            }
+        }
+        else
+        {
+            if (prevNearestNeighborDistance < currentNearestNeighborDistance)
+            {
+                torque = -1f;
+            }
+        }
+        
+        Debug.Log((torque, prevNearestNeighborDistance, currentNearestNeighborDistance));
+        prevNearestNeighborDistance = currentNearestNeighborDistance;
+        return new Tuple<Vector2, float>(Vector2.up, torque);
+    }
 }

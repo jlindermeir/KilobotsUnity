@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -10,7 +11,8 @@ public class KilobotMovement : MonoBehaviour
     public SpriteRenderer sr;
     public TextMesh tm;
     
-    private float forwardForce = 1f;
+    private float forwardForce = 0.5f;
+    private float torqueMag = 2.25f;
     private float communicationRadius = 4f;
     public KilobotAgent Agent = new KilobotAgent();
     public KilobotMessage CurrentMessage;
@@ -35,7 +37,7 @@ public class KilobotMovement : MonoBehaviour
         List<Tuple<float, KilobotMessage>> messageList = new List<Tuple<float, KilobotMessage>>();
         foreach (var hit in circleHits)
         {
-            if (!hit.CompareTag("Kilobot"))
+            if (!hit.CompareTag("Kilobot") | (hit.gameObject == transform.gameObject))
             {
                 continue;
             }
@@ -55,13 +57,14 @@ public class KilobotMovement : MonoBehaviour
         }
         
         // Get an motion direction and a message from the agent
-        (Vector2 direction, KilobotMessage newMessage) = Agent.Act(messageList);
+        (Vector2 direction, float torque, KilobotMessage newMessage) = Agent.Act(messageList);
         
         // Draw a line to indicate the deviation from the estimated and actual position
         Debug.DrawLine(position, Agent.PositionEstimate, Color.red);
         
         // Move in the specified direction
-        rb.AddForce(direction.normalized * forwardForce);
+        rb.AddRelativeForce(direction.normalized * forwardForce);
+        rb.AddTorque(torque * torqueMag);
         
         // Set the new message as current
         CurrentMessage = newMessage;
