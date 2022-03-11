@@ -60,8 +60,11 @@ public class KilobotMovement : MonoBehaviour
         (Vector2 direction, float torque, KilobotMessage newMessage) = Agent.Act(messageList);
         
         // Draw a line to indicate the deviation from the estimated and actual position
-        Debug.DrawLine(position, Agent.PositionEstimate, Color.red);
-        
+        if (Agent.PositionEstimated)
+        {
+            Debug.DrawLine(position, Agent.PositionEstimate, Color.red);
+        }
+
         // Move in the specified direction
         rb.AddRelativeForce(direction.normalized * forwardForce);
         rb.AddTorque(torque * torqueMag);

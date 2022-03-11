@@ -15,6 +15,7 @@ public class KilobotAgent
     }
     public State CurrentState;
     public Vector2 PositionEstimate = Vector2.zero;
+    public bool PositionEstimated = false;
     public bool PositionSeed = false;
     public int Gradient;
     public bool GradientSeed = false;
@@ -113,6 +114,7 @@ public class KilobotAgent
         // If the kilobot is a position seed, the estimate is already precise
         if (PositionSeed)
         {
+            PositionEstimated = true;
             return;
         }
         
@@ -129,6 +131,7 @@ public class KilobotAgent
         // Improve the position estimate, only try if there are 3 or more neighbors
         if (statNeighbours.Count < 3)
         {
+            PositionEstimated = false;
             return;
         }
 
@@ -137,6 +140,7 @@ public class KilobotAgent
             Vector2 directionToNeighbor = (PositionEstimate - neighborPosition).normalized;
             Vector2 newPosition = neighborPosition + distance * directionToNeighbor;
             PositionEstimate -= (PositionEstimate - newPosition) / 4;
+            PositionEstimated = true;
         }
     }
 
@@ -233,8 +237,12 @@ public class KilobotAgent
             }
         }
         
-        Debug.Log((torque, prevNearestNeighborDistance, currentNearestNeighborDistance));
         prevNearestNeighborDistance = currentNearestNeighborDistance;
         return new Tuple<Vector2, float>(Vector2.up, torque);
+    }
+
+    private bool IsInShape()
+    {
+        return false;
     }
 }
