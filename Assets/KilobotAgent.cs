@@ -20,11 +20,12 @@ public class KilobotAgent
     public bool GradientSeed = false;
 
     private const float GradientDistance = 3f;
+    private int StartupTime = 15;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
     {
         {State.Start, Color.gray},
-        {State.WaitToMove, Color.black},
+        {State.WaitToMove, Color.magenta},
         {State.MoveWhileOutside, Color.cyan},
         {State.MoveWhileInside, Color.blue},
         {State.JoinedShape, Color.green}
@@ -48,12 +49,17 @@ public class KilobotAgent
         // Update the position estimate
         EstimatePosition(messageList);
         
+        // Determine the movement within the state machine
         Vector2 motionDirection = Vector2.zero;
-
         switch (CurrentState)
         {
             case State.Start:
-                motionDirection = Random.insideUnitCircle;
+                motionDirection = ProcessStart();
+                break;
+            case State.WaitToMove:
+                motionDirection = ProcessWaitToMove(messageList);
+                break;
+            case State.MoveWhileOutside:
                 break;
             case State.JoinedShape:
                 break;
@@ -64,7 +70,7 @@ public class KilobotAgent
 
     public KilobotMessage GetMessage()
     {
-        return new KilobotMessage(Gradient, CurrentState, PositionEstimate);
+        return new KilobotMessage(Gradient, CurrentState, PositionEstimate, GetHashCode());
     }
 
     private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
@@ -117,7 +123,6 @@ public class KilobotAgent
         }
         
         // Improve the position estimate, only try if there are 3 or more neighbors
-        Debug.Log(statNeighbours.Count);
         if (statNeighbours.Count < 3)
         {
             return;
@@ -130,4 +135,65 @@ public class KilobotAgent
             PositionEstimate -= (PositionEstimate - newPosition) / 4;
         }
     }
+
+    private Vector2 ProcessStart()
+    {
+        if (StartupTime < 0)
+        {
+            CurrentState = State.WaitToMove;
+        }
+        else
+        {
+            StartupTime--;
+        }
+        return Vector2.zero;
+    }
+
+    private Vector2 ProcessWaitToMove(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        Vector2 direction = Vector2.zero;
+        
+        // Check if other visible bots are moving. If so, stay in this state
+        foreach ((_, KilobotMessage message) in messageList)
+        {
+            if (message.State == State.MoveWhileInside | message.State == State.MoveWhileOutside)
+            {
+                return direction;
+            }
+        }
+        
+        
+        // Determine the maximum gradient of neighbors
+        int maximumGradient = 0;
+        foreach ((_, KilobotMessage message) in messageList)
+        {
+            if (message.Gradient > maximumGradient)
+            {
+                maximumGradient = message.Gradient;
+            }
+        }
+        
+        // If our gradient is higher than the neighbour's, switch state
+        if (maximumGradient < Gradient)
+        {
+            CurrentState = State.MoveWhileOutside;
+            return direction;
+        }
+        
+        // If our gradient is equal the highest one, check who has the higher random ID
+        if (maximumGradient == Gradient)
+        {
+            foreach ((float _, KilobotMessage message) in messageList)
+            {
+                if (message.Gradient == maximumGradient && message.ID > GetHashCode())
+                {
+                    return direction;
+                }
+            }
+            CurrentState = State.MoveWhileOutside;
+        }
+
+        return direction;
+    }
+    
 }
