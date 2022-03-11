@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class KilobotAgent
 {
@@ -14,10 +15,11 @@ public class KilobotAgent
     }
     public State CurrentState;
     public Vector2 PositionEstimate;
+    public bool PositionSeed = false;
     public int Gradient;
     public bool GradientSeed = false;
 
-    private const float GradientDistance = 3f;
+    private const float GradientDistance = 1.5f;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
     {
@@ -47,6 +49,9 @@ public class KilobotAgent
 
         switch (CurrentState)
         {
+            case State.Start:
+                motionDirection = Random.insideUnitCircle;
+                break;
             case State.JoinedShape:
                 break;
         }
@@ -61,20 +66,32 @@ public class KilobotAgent
 
     private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
     {
+        // If the kilobot seeds the gradient computation, set the gradient to 0
         if (GradientSeed)
         {
             Gradient = 0;
             return;
         }
-
-        Gradient = 10000000;
+        
+        // Determine the minimum gradient of neighbours within GradientDistance
+        Gradient = Int32.MaxValue;
+        bool isAnyInRange = false;
         foreach ((float distance, KilobotMessage message) in messageList)
         {
-            if (distance < GradientDistance && message.Gradient < Gradient)
+            if (distance < GradientDistance && message.Gradient <= Gradient)
             {
                 Gradient = message.Gradient;
+                isAnyInRange = true;
             }
         }
-        Gradient++;
+        
+        // If at least on other bot was in range, set the own gradient as the minimum + 1
+        if (isAnyInRange)
+        {
+            Gradient++;
+            return;
+        }
+
+        Gradient = 0;
     }
 }

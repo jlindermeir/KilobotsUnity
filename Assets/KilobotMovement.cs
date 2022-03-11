@@ -10,8 +10,8 @@ public class KilobotMovement : MonoBehaviour
     public SpriteRenderer sr;
     public TextMesh tm;
     
-    public float forwardForce = 0.3f;
-    public float communicationRadius = 10f;
+    private float forwardForce = 1f;
+    private float communicationRadius = 10f;
     public KilobotAgent Agent = new KilobotAgent();
     public KilobotMessage CurrentMessage = KilobotMessage.Empty();
 
