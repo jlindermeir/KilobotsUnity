@@ -8,7 +8,7 @@ public struct KilobotMessage
 
     public static KilobotMessage Empty()
     {
-        return new KilobotMessage(0, KilobotAgent.State.Movement);
+        return new KilobotMessage(0, KilobotAgent.State.Start);
     }
     
     public int Gradient;

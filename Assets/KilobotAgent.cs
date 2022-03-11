@@ -1,25 +1,31 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class KilobotAgent
 {
     public enum State
     {
-        Movement,
-        FixedPosition
+        Start,
+        WaitToMove,
+        MoveWhileOutside,
+        MoveWhileInside,
+        JoinedShape
     }
     public State CurrentState;
     public Vector2 PositionEstimate;
+    public int Gradient;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
     {
-        {State.Movement, Color.red},
-        {State.FixedPosition, Color.green}
+        {State.Start, Color.gray},
+        {State.WaitToMove, Color.black},
+        {State.MoveWhileOutside, Color.cyan},
+        {State.MoveWhileInside, Color.blue},
+        {State.JoinedShape, Color.green}
     };
     
-    public KilobotAgent(State initialState = State.Movement)
+    public KilobotAgent(State initialState = State.Start)
     {
         CurrentState = initialState;
     }
@@ -31,7 +37,19 @@ public class KilobotAgent
 
     public Tuple<Vector2, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
     {
-        // TODO
-        return new Tuple<Vector2, KilobotMessage>(Random.insideUnitCircle, new KilobotMessage(0, CurrentState));
+        Vector2 motionDirection = Vector2.zero;
+
+        switch (CurrentState)
+        {
+            case State.JoinedShape:
+                break;
+        }
+        
+        return new Tuple<Vector2, KilobotMessage>(motionDirection, GetMessage());
+    }
+
+    private KilobotMessage GetMessage()
+    {
+        return new KilobotMessage(Gradient, CurrentState);
     }
 }
