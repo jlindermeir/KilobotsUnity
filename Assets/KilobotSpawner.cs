@@ -1,12 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class KilobotSpawner : MonoBehaviour
 {
     public Object kilobot;
-    private const int NBots = 10;
-    private const float InitialSpacing = 1f;
+    private const int NRows = 3;
+    private const int NColums = 6;
+    private const float InitialSpacing = 1.5f;
     
     // Start is called before the first frame update
     void Start()
@@ -38,9 +37,15 @@ public class KilobotSpawner : MonoBehaviour
         }
         
         // Spawn other Kilobots
-        for (int i = 0; i < NBots; i++)
-        {
-            Instantiate(kilobot, Random.insideUnitCircle * 5f, Quaternion.identity);
+        Vector2 spawnPosition = new Vector2(0, -InitialSpacing);
+        for (int i = 0; i < NColums; i++)
+        {   
+            for (int j = 0; j < NRows; j++)
+            {
+                Vector2 offset = new Vector2(i * InitialSpacing, -j * InitialSpacing);
+                Instantiate(kilobot, spawnPosition + offset, Quaternion.identity);
+            }
         }
+
     }
 }

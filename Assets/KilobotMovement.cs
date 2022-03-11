@@ -13,13 +13,13 @@ public class KilobotMovement : MonoBehaviour
     private float forwardForce = 1f;
     private float communicationRadius = 10f;
     public KilobotAgent Agent = new KilobotAgent();
-    public KilobotMessage CurrentMessage = KilobotMessage.Empty();
+    public KilobotMessage CurrentMessage;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        CurrentMessage = Agent.GetMessage();
     }
 
     // Update is called once per frame
@@ -56,6 +56,9 @@ public class KilobotMovement : MonoBehaviour
         
         // Get an motion direction and a message from the agent
         (Vector2 direction, KilobotMessage newMessage) = Agent.Act(messageList);
+        
+        // Draw a line to indicate the deveation from the estimated and actual position
+        Debug.DrawLine(position, Agent.PositionEstimate, Color.red);
         
         // Move in the specified direction
         rb.AddForce(direction.normalized * forwardForce);
