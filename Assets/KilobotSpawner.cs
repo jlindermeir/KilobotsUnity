@@ -32,7 +32,7 @@ public class KilobotSpawner : MonoBehaviour
 
             if (i == 0)
             {
-                agent.Gradient = 0;
+                agent.GradientSeed = true;
             }
         }
     }

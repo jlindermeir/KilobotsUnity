@@ -14,7 +14,10 @@ public class KilobotAgent
     }
     public State CurrentState;
     public Vector2 PositionEstimate;
-    public int Gradient = -1;
+    public int Gradient;
+    public bool GradientSeed = false;
+
+    private const float GradientDistance = 3f;
 
     private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
     {
@@ -37,6 +40,9 @@ public class KilobotAgent
 
     public Tuple<Vector2, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
     {
+        // Update the gradient value
+        UpdateGradient(messageList);
+        
         Vector2 motionDirection = Vector2.zero;
 
         switch (CurrentState)
@@ -51,5 +57,24 @@ public class KilobotAgent
     private KilobotMessage GetMessage()
     {
         return new KilobotMessage(Gradient, CurrentState);
+    }
+
+    private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        if (GradientSeed)
+        {
+            Gradient = 0;
+            return;
+        }
+
+        Gradient = 10000000;
+        foreach ((float distance, KilobotMessage message) in messageList)
+        {
+            if (distance < GradientDistance && message.Gradient < Gradient)
+            {
+                Gradient = message.Gradient;
+            }
+        }
+        Gradient++;
     }
 }

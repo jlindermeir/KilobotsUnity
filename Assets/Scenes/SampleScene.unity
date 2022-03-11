@@ -523,7 +523,7 @@ MonoBehaviour:
   sr: {fileID: 1785355558}
   tm: {fileID: 963334905}
   forwardForce: 0.1
-  communicationRadius: 1.05
+  communicationRadius: 5
 --- !u!58 &1785355562
 CircleCollider2D:
   m_ObjectHideFlags: 0
