@@ -2,7 +2,7 @@ using UnityEngine;
 
 public struct KilobotMessage
 {
-    public KilobotMessage(int gradient, KilobotAgent.State state, Vector2 position, int id)
+    public KilobotMessage(int gradient, KilobotAgent.State state, Vector2 position, float id)
     {
         Gradient = gradient;
         State = state;
@@ -13,5 +13,5 @@ public struct KilobotMessage
     public int Gradient;
     public KilobotAgent.State State;
     public Vector2 Position;
-    public int ID;
+    public float ID;
 }

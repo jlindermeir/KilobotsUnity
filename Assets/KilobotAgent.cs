@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
+
 
 public class KilobotAgent
 {
@@ -19,6 +20,7 @@ public class KilobotAgent
     public bool PositionSeed = false;
     public int Gradient;
     public bool GradientSeed = false;
+    public float RandomID;
 
     private const float GradientDistance = 3f;
     private const float EdgeDistance = 1.75f;
@@ -37,6 +39,8 @@ public class KilobotAgent
     public KilobotAgent(State initialState = State.Start)
     {
         CurrentState = initialState;
+        Random rng = new Random();
+        RandomID = (float)rng.NextDouble();
     }
 
     public Color GetStateColor()
@@ -78,7 +82,7 @@ public class KilobotAgent
 
     public KilobotMessage GetMessage()
     {
-        return new KilobotMessage(Gradient, CurrentState, PositionEstimate, GetHashCode());
+        return new KilobotMessage(Gradient, CurrentState, PositionEstimate, RandomID);
     }
 
     private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
@@ -197,7 +201,7 @@ public class KilobotAgent
         {
             foreach ((_, KilobotMessage message) in messageList)
             {
-                if (message.Gradient == maximumGradient && message.ID > GetHashCode())
+                if (message.Gradient == maximumGradient && message.ID > RandomID)
                 {
                     return action;
                 }
