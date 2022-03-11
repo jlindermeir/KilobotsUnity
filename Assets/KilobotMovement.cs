@@ -12,7 +12,7 @@ public class KilobotMovement : MonoBehaviour
     public TextMesh tm;
     
     private float forwardForce = 0.5f;
-    private float torqueMag = 2.25f;
+    private float torqueMag = 2f;
     private float communicationRadius = 4f;
     public KilobotAgent Agent = new KilobotAgent();
     public KilobotMessage CurrentMessage;

@@ -66,6 +66,9 @@ public class KilobotAgent
             case State.MoveWhileOutside:
                 (motionDirection, torque) = ProcessMoveOutside(messageList);
                 break;
+            case State.MoveWhileInside:
+                (motionDirection, torque) = ProcessMoveInside(messageList);
+                break;
             case State.JoinedShape:
                 break;
         }
@@ -207,6 +210,20 @@ public class KilobotAgent
 
     private Tuple<Vector2, float> ProcessMoveOutside(List<Tuple<float, KilobotMessage>> messageList)
     {
+        if (IsInShape())
+        {
+            CurrentState = State.MoveWhileInside;
+        }
+        return FollowEdge(messageList);
+    }
+    
+    private Tuple<Vector2, float> ProcessMoveInside(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        if (!IsInShape())
+        {
+            CurrentState = State.JoinedShape;
+            return new Tuple<Vector2, float>(Vector2.zero, 0);
+        }
         return FollowEdge(messageList);
     }
 
@@ -243,6 +260,19 @@ public class KilobotAgent
 
     private bool IsInShape()
     {
+        if (!PositionEstimated)
+        {
+            return false;
+        }
+
+        Vector2 center = new Vector2(0, 8.5f);
+        const float radius = 7.5f;
+
+        if ((PositionEstimate - center).magnitude < radius)
+        {
+            return true;
+        }
+
         return false;
     }
 }

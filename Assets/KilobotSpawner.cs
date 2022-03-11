@@ -3,8 +3,8 @@ using UnityEngine;
 public class KilobotSpawner : MonoBehaviour
 {
     public Object kilobot;
-    private const int NRows = 3;
-    private const int NColums = 6;
+    private const int NRows = 5;
+    private const int NColums = 20;
     private const float InitialSpacing = 1.5f;
     
     // Start is called before the first frame update
