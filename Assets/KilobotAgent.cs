@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class KilobotAgent
 {
@@ -25,5 +27,11 @@ public class KilobotAgent
     public Color GetStateColor()
     {
         return _stateColor[CurrentState];
+    }
+
+    public Tuple<Vector2, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
+    {
+        // TODO
+        return new Tuple<Vector2, KilobotMessage>(Random.insideUnitCircle, new KilobotMessage(0, CurrentState));
     }
 }

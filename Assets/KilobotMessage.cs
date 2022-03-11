@@ -1,0 +1,16 @@
+public struct KilobotMessage
+{
+    public KilobotMessage(int gradient, KilobotAgent.State state)
+    {
+        Gradient = gradient;
+        State = state;
+    }
+
+    public static KilobotMessage Empty()
+    {
+        return new KilobotMessage(0, KilobotAgent.State.Movement);
+    }
+    
+    public int Gradient;
+    public KilobotAgent.State State;
+}
