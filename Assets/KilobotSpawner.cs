@@ -46,6 +46,9 @@ public class KilobotSpawner : MonoBehaviour
                 Instantiate(kilobot, spawnPosition + offset, Quaternion.identity);
             }
         }
+        
+        // Set the time scale
+        Time.timeScale = 10f;
 
     }
 }
