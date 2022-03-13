@@ -3,8 +3,8 @@ using UnityEngine;
 public class KilobotSpawner : MonoBehaviour
 {
     public GameObject kilobot;
-    private const int NRows = 3;
-    private const int NColums = 3;
+    private const int NRows = 4;
+    private const int NColumns = 7;
     private const float InitialSpacing = 1.5f;
     
     // Start is called before the first frame update
@@ -22,7 +22,7 @@ public class KilobotSpawner : MonoBehaviour
         {
             // Create the kilobot at the specified location
             Vector2 position = new Vector2(fixedPositions[i, 0], fixedPositions[i, 1]);
-            GameObject fixedKilobot = Instantiate(kilobot, position, Quaternion.identity) as GameObject;
+            GameObject fixedKilobot = Instantiate(kilobot, position, Quaternion.identity);
             KilobotAgent agent = fixedKilobot.GetComponent<KilobotMovement>().Agent;
             
             // Set the kilobot as final
@@ -38,7 +38,7 @@ public class KilobotSpawner : MonoBehaviour
         
         // Spawn other Kilobots
         Vector2 spawnPosition = new Vector2(0, -InitialSpacing);
-        for (int i = 0; i < NColums; i++)
+        for (int i = 0; i < NColumns; i++)
         {   
             for (int j = 0; j < NRows; j++)
             {
