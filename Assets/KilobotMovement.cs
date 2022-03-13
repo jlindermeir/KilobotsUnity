@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class KilobotMovement : MonoBehaviour
 {
@@ -31,7 +28,7 @@ public class KilobotMovement : MonoBehaviour
         Vector2 position = transform.position;
         
         // Communicate with surrounding Kilobots within the communication radius
-        Collider2D[] circleHits = Physics2D.OverlapCircleAll(transform.position, communicationRadius);
+        Collider2D[] circleHits = Physics2D.OverlapCircleAll(position, communicationRadius);
         
         // Create a list of messages from other Kilobots and their distances
         List<Tuple<float, KilobotMessage>> messageList = new List<Tuple<float, KilobotMessage>>();

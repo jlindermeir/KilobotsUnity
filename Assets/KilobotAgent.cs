@@ -228,6 +228,24 @@ public class KilobotAgent
             CurrentState = State.JoinedShape;
             return new Tuple<Vector2, float>(Vector2.zero, 0);
         }
+
+        float closestNeighborDistance = float.MaxValue;
+        int closestNeighborGradient = Int32.MaxValue;
+        foreach ((float distance, KilobotMessage message) in messageList)
+        {
+            if (distance < closestNeighborDistance)
+            {
+                closestNeighborDistance = distance;
+                closestNeighborGradient = message.Gradient;
+            }
+        }
+
+        if (closestNeighborGradient >= Gradient)
+        {
+            CurrentState = State.JoinedShape;
+            return new Tuple<Vector2, float>(Vector2.zero, 0);
+        }
+
         return FollowEdge(messageList);
     }
 
