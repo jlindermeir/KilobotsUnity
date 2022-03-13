@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class KilobotSpawner : MonoBehaviour
 {
-    public Object kilobot;
-    private const int NRows = 5;
-    private const int NColums = 20;
+    public GameObject kilobot;
+    private const int NRows = 3;
+    private const int NColums = 3;
     private const float InitialSpacing = 1.5f;
     
     // Start is called before the first frame update
@@ -49,6 +49,8 @@ public class KilobotSpawner : MonoBehaviour
         
         // Set the time scale
         Time.timeScale = 10f;
-
+        
+        // Remove the initial kilobot
+        Destroy(kilobot);
     }
 }
