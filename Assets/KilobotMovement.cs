@@ -7,10 +7,11 @@ public class KilobotMovement : MonoBehaviour
     public Rigidbody2D rb;
     public SpriteRenderer sr;
     public TextMesh tm;
-    
-    private float forwardForce = 0.5f;
-    private float torqueMag = 2f;
-    private float communicationRadius = 4f;
+    public Collider2D targetShape;
+
+    private const float ForwardForce = 0.5f;
+    private const float TorqueMag = 2f;
+    private const float CommunicationRadius = 4f;
     public KilobotAgent Agent = new KilobotAgent();
     public KilobotMessage CurrentMessage;
 
@@ -18,6 +19,7 @@ public class KilobotMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Agent.TargetShape = targetShape;
         CurrentMessage = Agent.GetMessage();
     }
 
@@ -28,7 +30,7 @@ public class KilobotMovement : MonoBehaviour
         Vector2 position = transform.position;
         
         // Communicate with surrounding Kilobots within the communication radius
-        Collider2D[] circleHits = Physics2D.OverlapCircleAll(position, communicationRadius);
+        Collider2D[] circleHits = Physics2D.OverlapCircleAll(position, CommunicationRadius);
         
         // Create a list of messages from other Kilobots and their distances
         List<Tuple<float, KilobotMessage>> messageList = new List<Tuple<float, KilobotMessage>>();
@@ -63,8 +65,8 @@ public class KilobotMovement : MonoBehaviour
         }
 
         // Move in the specified direction
-        rb.AddRelativeForce(direction.normalized * forwardForce);
-        rb.AddTorque(torque * torqueMag);
+        rb.AddRelativeForce(direction.normalized * ForwardForce);
+        rb.AddTorque(torque * TorqueMag);
         
         // Set the new message as current
         CurrentMessage = newMessage;

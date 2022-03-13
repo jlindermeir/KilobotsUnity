@@ -21,6 +21,7 @@ public class KilobotAgent
     public int Gradient;
     public bool GradientSeed = false;
     public float RandomID;
+    public Collider2D TargetShape;
 
     private const float GradientDistance = 3f;
     private const float EdgeDistance = 1.75f;
@@ -179,11 +180,11 @@ public class KilobotAgent
         }
         
         
-        // Determine the maximum gradient of neighbors
+        // Determine the maximum gradient of neighbors that are outside of the shape
         int maximumGradient = 0;
         foreach ((_, KilobotMessage message) in messageList)
         {
-            if (message.Gradient > maximumGradient)
+            if (message.State != State.JoinedShape && message.Gradient > maximumGradient)
             {
                 maximumGradient = message.Gradient;
             }
@@ -287,14 +288,7 @@ public class KilobotAgent
             return false;
         }
 
-        Vector2 center = new Vector2(0, 8.5f);
-        const float radius = 7.5f;
-
-        if ((PositionEstimate - center).magnitude < radius)
-        {
-            return true;
-        }
-
-        return false;
+        Vector2 closestPoint = TargetShape.ClosestPoint(PositionEstimate);
+        return closestPoint == PositionEstimate;
     }
 }
