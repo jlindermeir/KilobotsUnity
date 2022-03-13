@@ -223,7 +223,7 @@ public class KilobotAgent
     
     private Tuple<Vector2, float> ProcessMoveInside(List<Tuple<float, KilobotMessage>> messageList)
     {
-        if (!IsInShape())
+        if (PositionEstimated && !IsInShape())
         {
             CurrentState = State.JoinedShape;
             return new Tuple<Vector2, float>(Vector2.zero, 0);
