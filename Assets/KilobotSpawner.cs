@@ -4,6 +4,7 @@ using UnityEngine;
 public class KilobotSpawner : MonoBehaviour
 {
     public GameObject kilobot;
+    public Collider2D targetShape;
     private const int NRows = 4;
     private const int NColumns = 7;
     private const float InitialSpacing = 1.5f;
@@ -21,13 +22,11 @@ public class KilobotSpawner : MonoBehaviour
         };
         for (int i = 0; i < fixedPositions.GetLength(0); i++)
         {
-            // Create the kilobot at the specified location
+            // Create a new agent at the specified location
             Vector2 position = new Vector2(fixedPositions[i, 0], fixedPositions[i, 1]);
-            GameObject fixedKilobot = Instantiate(kilobot, position, Quaternion.identity);
-            ShapeAssemblyAgent agent = fixedKilobot.GetComponent<KilobotMovement>().Agent;
+            ShapeAssemblyAgent agent = InitializeKilobot(position, ShapeAssemblyAgent.State.JoinedShape);
             
-            // Set the kilobot as final
-            agent.CurrentState = ShapeAssemblyAgent.State.JoinedShape;
+            // Set the kilobot as part of the coordinate system
             agent.PositionEstimate = position;
             agent.PositionSeed = true;
 
@@ -44,7 +43,7 @@ public class KilobotSpawner : MonoBehaviour
             for (int j = 0; j < NRows; j++)
             {
                 Vector2 offset = new Vector2(i * InitialSpacing, -j * InitialSpacing);
-                Instantiate(kilobot, spawnPosition + offset, Quaternion.identity);
+                InitializeKilobot(spawnPosition + offset);
             }
         }
         
@@ -53,5 +52,20 @@ public class KilobotSpawner : MonoBehaviour
         
         // Remove the initial kilobot
         Destroy(kilobot);
+    }
+
+    private ShapeAssemblyAgent InitializeKilobot(Vector2 position, ShapeAssemblyAgent.State initialState = ShapeAssemblyAgent.State.Start)
+    {
+        // Create a new Kilobot at the specified position
+        GameObject newKilobot = Instantiate(kilobot, position, Quaternion.identity);
+        
+        // Assign the agent
+        ShapeAssemblyAgent agent = new ShapeAssemblyAgent(initialState);
+        KilobotMovement kilobotMovement = newKilobot.GetComponent<KilobotMovement>();
+        kilobotMovement.Agent = agent;
+        
+        // Set the target shape
+        agent.TargetShape = targetShape;
+        return agent;
     }
 }

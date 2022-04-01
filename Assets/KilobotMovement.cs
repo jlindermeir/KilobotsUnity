@@ -8,19 +8,17 @@ public class KilobotMovement : MonoBehaviour
     public Rigidbody2D rb;
     public SpriteRenderer sr;
     public TextMesh tm;
-    public Collider2D targetShape;
 
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
     private const float CommunicationRadius = 4f;
-    public ShapeAssemblyAgent Agent = new ShapeAssemblyAgent();
+    public IAgentInterface Agent = new ShapeAssemblyAgent();
     public KilobotMessage CurrentMessage;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        Agent.TargetShape = targetShape;
         CurrentMessage = Agent.GetMessage();
     }
 
@@ -79,6 +77,6 @@ public class KilobotMovement : MonoBehaviour
     private void UpdateSprite()
     {
         sr.color = Agent.GetStateColor();
-        tm.text = Agent.Gradient.ToString();
+        tm.text = Agent.GetDisplayText();
     }
 }

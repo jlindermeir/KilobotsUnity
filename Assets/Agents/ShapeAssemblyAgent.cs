@@ -6,7 +6,7 @@ using Random = System.Random;
 
 namespace Agents
 {
-    public class ShapeAssemblyAgent
+    public class ShapeAssemblyAgent : IAgentInterface
     {
         public enum State
         {
@@ -16,21 +16,22 @@ namespace Agents
             MoveWhileInside,
             JoinedShape
         }
-        public State CurrentState;
-        public Vector2 PositionEstimate = Vector2.zero;
-        public bool PositionEstimated = false;
+        private State _currentState;
         public bool PositionSeed = false;
-        public int Gradient;
+        private int _gradient;
         public bool GradientSeed = false;
-        public float RandomID;
+        private readonly float _randomID;
         public Collider2D TargetShape;
+        
+        public bool PositionEstimated { get; private set; }
+        public Vector2 PositionEstimate { get; set; } = Vector2.zero;
 
         private const float GradientDistance = 3f;
         private const float EdgeDistance = 1.75f;
-        private float prevNearestNeighborDistance = float.MaxValue;
-        private int StartupTime = 15;
+        private float _prevNearestNeighborDistance = float.MaxValue;
+        private int _startupTime = 15;
 
-        private Dictionary<State, Color> _stateColor = new Dictionary<State, Color>()
+        private static readonly Dictionary<State, Color> StateColor = new Dictionary<State, Color>()
         {
             {State.Start, Color.gray},
             {State.WaitToMove, Color.magenta},
@@ -41,14 +42,19 @@ namespace Agents
     
         public ShapeAssemblyAgent(State initialState = State.Start)
         {
-            CurrentState = initialState;
+            _currentState = initialState;
             Random rng = new Random();
-            RandomID = (float)rng.NextDouble();
+            _randomID = (float)rng.NextDouble();
         }
 
         public Color GetStateColor()
         {
-            return _stateColor[CurrentState];
+            return StateColor[_currentState];
+        }
+
+        public string GetDisplayText()
+        {
+            return _gradient.ToString();
         }
 
         public Tuple<Vector2, float, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
@@ -62,7 +68,7 @@ namespace Agents
             // Determine the movement within the state machine
             Vector2 motionDirection = Vector2.zero;
             float torque = 0f;
-            switch (CurrentState)
+            switch (_currentState)
             {
                 case State.Start:
                     (motionDirection, torque) = ProcessStart();
@@ -85,7 +91,7 @@ namespace Agents
 
         public KilobotMessage GetMessage()
         {
-            return new KilobotMessage(Gradient, CurrentState, PositionEstimate, RandomID);
+            return new KilobotMessage(_gradient, _currentState, PositionEstimate, _randomID);
         }
 
         private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
@@ -93,18 +99,18 @@ namespace Agents
             // If the kilobot seeds the gradient computation, set the gradient to 0
             if (GradientSeed)
             {
-                Gradient = 0;
+                _gradient = 0;
                 return;
             }
         
             // Determine the minimum gradient of neighbours within GradientDistance
-            Gradient = Int32.MaxValue;
+            _gradient = Int32.MaxValue;
             bool isAnyInRange = false;
             foreach ((float distance, KilobotMessage message) in messageList)
             {
-                if (distance < GradientDistance && message.Gradient <= Gradient)
+                if (distance < GradientDistance && message.Gradient <= _gradient)
                 {
-                    Gradient = message.Gradient;
+                    _gradient = message.Gradient;
                     isAnyInRange = true;
                 }
             }
@@ -112,11 +118,11 @@ namespace Agents
             // If at least on other bot was in range, set the own gradient as the minimum + 1
             if (isAnyInRange)
             {
-                Gradient++;
+                _gradient++;
                 return;
             }
 
-            Gradient = 0;
+            _gradient = 0;
         }
 
         private void EstimatePosition(List<Tuple<float, KilobotMessage>> messageList)
@@ -156,13 +162,13 @@ namespace Agents
 
         private Tuple<Vector2, float> ProcessStart()
         {
-            if (StartupTime < 0)
+            if (_startupTime < 0)
             {
-                CurrentState = State.WaitToMove;
+                _currentState = State.WaitToMove;
             }
             else
             {
-                StartupTime--;
+                _startupTime--;
             }
 
             return new Tuple<Vector2, float>(Vector2.zero, 0);
@@ -193,23 +199,23 @@ namespace Agents
             }
         
             // If our gradient is higher than the neighbour's, switch state
-            if (maximumGradient < Gradient)
+            if (maximumGradient < _gradient)
             {
-                CurrentState = State.MoveWhileOutside;
+                _currentState = State.MoveWhileOutside;
                 return action;
             }
         
             // If our gradient is equal the highest one, check who has the higher random ID
-            if (maximumGradient == Gradient)
+            if (maximumGradient == _gradient)
             {
                 foreach ((_, KilobotMessage message) in messageList)
                 {
-                    if (message.Gradient == maximumGradient && message.ID > RandomID)
+                    if (message.Gradient == maximumGradient && message.ID > _randomID)
                     {
                         return action;
                     }
                 }
-                CurrentState = State.MoveWhileOutside;
+                _currentState = State.MoveWhileOutside;
             }
 
             return action;
@@ -219,7 +225,7 @@ namespace Agents
         {
             if (IsInShape())
             {
-                CurrentState = State.MoveWhileInside;
+                _currentState = State.MoveWhileInside;
             }
             return FollowEdge(messageList);
         }
@@ -228,7 +234,7 @@ namespace Agents
         {
             if (PositionEstimated && !IsInShape())
             {
-                CurrentState = State.JoinedShape;
+                _currentState = State.JoinedShape;
                 return new Tuple<Vector2, float>(Vector2.zero, 0);
             }
 
@@ -243,9 +249,9 @@ namespace Agents
                 }
             }
 
-            if (closestNeighborGradient >= Gradient)
+            if (closestNeighborGradient >= _gradient)
             {
-                CurrentState = State.JoinedShape;
+                _currentState = State.JoinedShape;
                 return new Tuple<Vector2, float>(Vector2.zero, 0);
             }
 
@@ -266,20 +272,20 @@ namespace Agents
             float torque = 0f; 
             if (currentNearestNeighborDistance < EdgeDistance)
             {
-                if (prevNearestNeighborDistance > currentNearestNeighborDistance)
+                if (_prevNearestNeighborDistance > currentNearestNeighborDistance)
                 {
                     torque = 1f;
                 }
             }
             else
             {
-                if (prevNearestNeighborDistance < currentNearestNeighborDistance)
+                if (_prevNearestNeighborDistance < currentNearestNeighborDistance)
                 {
                     torque = -1f;
                 }
             }
         
-            prevNearestNeighborDistance = currentNearestNeighborDistance;
+            _prevNearestNeighborDistance = currentNearestNeighborDistance;
             return new Tuple<Vector2, float>(Vector2.up, torque);
         }
 
