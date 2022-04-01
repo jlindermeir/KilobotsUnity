@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Agents;
 using UnityEngine;
 
 public class KilobotMovement : MonoBehaviour
@@ -12,7 +13,7 @@ public class KilobotMovement : MonoBehaviour
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
     private const float CommunicationRadius = 4f;
-    public KilobotAgent Agent = new KilobotAgent();
+    public ShapeAssemblyAgent Agent = new ShapeAssemblyAgent();
     public KilobotMessage CurrentMessage;
 
 

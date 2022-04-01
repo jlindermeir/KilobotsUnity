@@ -1,3 +1,4 @@
+using Agents;
 using UnityEngine;
 
 public class KilobotSpawner : MonoBehaviour
@@ -23,10 +24,10 @@ public class KilobotSpawner : MonoBehaviour
             // Create the kilobot at the specified location
             Vector2 position = new Vector2(fixedPositions[i, 0], fixedPositions[i, 1]);
             GameObject fixedKilobot = Instantiate(kilobot, position, Quaternion.identity);
-            KilobotAgent agent = fixedKilobot.GetComponent<KilobotMovement>().Agent;
+            ShapeAssemblyAgent agent = fixedKilobot.GetComponent<KilobotMovement>().Agent;
             
             // Set the kilobot as final
-            agent.CurrentState = KilobotAgent.State.JoinedShape;
+            agent.CurrentState = ShapeAssemblyAgent.State.JoinedShape;
             agent.PositionEstimate = position;
             agent.PositionSeed = true;
 
