@@ -23,6 +23,9 @@ namespace Agents.PotentialMinimization
 
         private State _currentState;
         private float _totalEnergy = 0;
+        
+        private Vector2 _previousMotionDirection = Vector2.up;
+        private float _previousEnergy = 0;
 
         public PotentialMinimizationAgent(State initialState = State.Idle)
         {
@@ -63,6 +66,12 @@ namespace Agents.PotentialMinimization
             // If no other bot is moving and has higher potential energy, switch to moving
             foreach (var (_, message) in messageList)
             {
+                // Skip fixed bots
+                if (message.State == State.Fixed)
+                {
+                    continue;
+                }
+                
                 if (message.PotentialEnergy > _totalEnergy | message.State == State.Moving)
                 {
                     return returnVal;
@@ -78,14 +87,27 @@ namespace Agents.PotentialMinimization
             // If other bots have higher potential energy, switch to idle
             foreach (var (_, message) in messageList)
             {
+                // Skip fixed bots
+                if (message.State == State.Fixed)
+                {
+                    continue;
+                }
+                
                 if (message.PotentialEnergy > _totalEnergy)
                 {
                     _currentState = State.Idle;
                     return new Tuple<Vector2, float>(Vector2.zero, 0);
                 }
             }
-
-            return new Tuple<Vector2, float>(Random.insideUnitCircle, 0);
+            
+            // If the previous energy is higher than the current one, keep moving in the same direction, else move randomly
+            Vector2 direction = (_previousEnergy > _totalEnergy) ? _previousMotionDirection : Random.insideUnitCircle;
+            
+            // Store energy and direction
+            _previousEnergy = _totalEnergy;
+            _previousMotionDirection = direction;
+            
+            return new Tuple<Vector2, float>(direction, 0);
         }
 
         private static float PotentialFunction(float distance)
@@ -96,6 +118,13 @@ namespace Agents.PotentialMinimization
         private void CalculateTotalPotentialEnergy(List<Tuple<float, PotentialMinimizationMessage>> messageList)
         {
             _totalEnergy = 0;
+
+            int nNeighbors = messageList.Count;
+
+            if (nNeighbors == 0)
+            {
+                return;
+            }
 
             foreach ((float distance, _) in messageList)
             {

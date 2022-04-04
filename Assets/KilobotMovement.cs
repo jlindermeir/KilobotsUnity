@@ -11,7 +11,7 @@ public class KilobotMovement<TMessage> : MonoBehaviour
 
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
-    private const float CommunicationRadius = 2f;
+    private const float CommunicationRadius = 4f;
     public IAgentInterface<TMessage> Agent;
     public TMessage CurrentMessage;
 
