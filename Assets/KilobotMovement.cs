@@ -11,7 +11,7 @@ public class KilobotMovement<TMessage> : MonoBehaviour
 
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
-    private const float CommunicationRadius = 4f;
+    private const float CommunicationRadius = 2f;
     public IAgentInterface<TMessage> Agent;
     public TMessage CurrentMessage;
 
@@ -78,5 +78,12 @@ public class KilobotMovement<TMessage> : MonoBehaviour
     {
         sr.color = Agent.GetStateColor();
         tm.text = Agent.GetDisplayText();
+    }
+
+    public void AddKilobotComponents(GameObject kilobot)
+    {
+        rb = kilobot.GetComponent<Rigidbody2D>();
+        sr = kilobot.GetComponent<SpriteRenderer>();
+        tm = kilobot.GetComponentInChildren<TextMesh>();
     }
 }

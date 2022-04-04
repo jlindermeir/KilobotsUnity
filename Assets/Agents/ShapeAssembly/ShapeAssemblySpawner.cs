@@ -15,9 +15,7 @@ namespace Agents.ShapeAssembly
         {
             // Add the movement script to the kilobot
             ShapeAssemblyMovement movementScript = kilobot.AddComponent<ShapeAssemblyMovement>();
-            movementScript.rb = kilobot.GetComponent<Rigidbody2D>();
-            movementScript.sr = kilobot.GetComponent<SpriteRenderer>();
-            movementScript.tm = kilobot.GetComponentInChildren<TextMesh>();
+            movementScript.AddKilobotComponents(kilobot);
         
             // Spawn fixed Kilobots
             float[,] fixedPositions =

@@ -149,11 +149,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 250207671}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bf5d5e0429a988eeb0e592e784fff84, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c39e126f0744ed5ad9edc5ff2f48ef1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   kilobot: {fileID: 1785355557}
-  targetShape: {fileID: 1003264122}
 --- !u!4 &250207673
 Transform:
   m_ObjectHideFlags: 0
