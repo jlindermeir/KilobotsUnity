@@ -8,9 +8,9 @@ namespace Agents.PotentialMinimization
     {
         public GameObject kilobot;
 
-        private static int NBots = 30;
-        private static int NFixedBots = 25;
-        private static float Radius = 10;
+        private static int NBots = 90;
+        private static int NFixedBots = 50;
+        private static float Radius = 20;
 
         void Start()
         {

@@ -23,18 +23,22 @@ namespace Agents.PotentialMinimization
 
         private State _currentState;
         private float _totalEnergy = 0;
+        private float _gas;
         
         private Vector2 _previousMotionDirection = Vector2.up;
         private float _previousEnergy = 0;
+        private static float _movementGasCost = 0.01f;
+        private static float _gasGain = 0.1f;
 
         public PotentialMinimizationAgent(State initialState = State.Idle)
         {
             _currentState = initialState;
+            _gas = Random.value;
         }
 
         public PotentialMinimizationMessage GetMessage()
         {
-            return new PotentialMinimizationMessage(_currentState, _totalEnergy);
+            return new PotentialMinimizationMessage(_currentState, _totalEnergy, _gas);
         }
 
         public Tuple<Vector2, float, PotentialMinimizationMessage> Act(List<Tuple<float, PotentialMinimizationMessage>> messageList)
@@ -61,9 +65,13 @@ namespace Agents.PotentialMinimization
 
         private Tuple<Vector2, float> ProcessIdle(List<Tuple<float, PotentialMinimizationMessage>> messageList)
         {
+            // Idle, no movement
             Tuple<Vector2, float> returnVal = new Tuple<Vector2, float>(Vector2.zero, 0);
             
-            // If no other bot is moving and has higher potential energy, switch to moving
+            // Add gas
+            _gas += _gasGain * Time.deltaTime * (1 - _gas);
+            
+            // If no other bot is moving and has higher gas, switch to moving
             foreach (var (_, message) in messageList)
             {
                 // Skip fixed bots
@@ -72,7 +80,7 @@ namespace Agents.PotentialMinimization
                     continue;
                 }
                 
-                if (message.PotentialEnergy > _totalEnergy | message.State == State.Moving)
+                if (message.Gas > _gas | message.State == State.Moving)
                 {
                     return returnVal;
                 }
@@ -84,21 +92,13 @@ namespace Agents.PotentialMinimization
         
         private Tuple<Vector2, float> ProcessMoving(List<Tuple<float, PotentialMinimizationMessage>> messageList)
         {
-            // If other bots have higher potential energy, switch to idle
-            foreach (var (_, message) in messageList)
+            // If the gas is empty, switch to idle
+            if (_gas <= 0)
             {
-                // Skip fixed bots
-                if (message.State == State.Fixed)
-                {
-                    continue;
-                }
-                
-                if (message.PotentialEnergy > _totalEnergy)
-                {
-                    _currentState = State.Idle;
-                    return new Tuple<Vector2, float>(Vector2.zero, 0);
-                }
-            }
+                _gas = 0;
+                _currentState = State.Idle;
+                return new Tuple<Vector2, float>(Vector2.zero, 0);
+            } 
             
             // If the previous energy is higher than the current one, keep moving in the same direction, else move randomly
             Vector2 direction = (_previousEnergy > _totalEnergy) ? _previousMotionDirection : Random.insideUnitCircle;
@@ -107,12 +107,15 @@ namespace Agents.PotentialMinimization
             _previousEnergy = _totalEnergy;
             _previousMotionDirection = direction;
             
+            // Deduct gas costs
+            _gas -= _movementGasCost * Time.deltaTime;
+            
             return new Tuple<Vector2, float>(direction, 0);
         }
 
         private static float PotentialFunction(float distance)
         {
-            return 1 / distance;
+            return -20f * (1 / distance - 1 / (distance * distance));
         }
 
         private void CalculateTotalPotentialEnergy(List<Tuple<float, PotentialMinimizationMessage>> messageList)
@@ -136,12 +139,13 @@ namespace Agents.PotentialMinimization
         public Vector2 PositionEstimate { get; } = Vector2.zero;
         public Color GetStateColor()
         {
-            return StateColor[_currentState];
+            Color stateColor = StateColor[_currentState];
+            return new Color(stateColor.r, stateColor.g, stateColor.b, (1 + _gas) / 2);
         }
 
         public string GetDisplayText()
         {
-            return String.Format("{0:0.00}", _totalEnergy);
+            return String.Format("", _gas);
         }
     }
 }
