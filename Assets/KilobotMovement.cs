@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Agents;
 using UnityEngine;
 
-public class KilobotMovement : MonoBehaviour
+public class KilobotMovement<TMessage> : MonoBehaviour
 {
     public Rigidbody2D rb;
     public SpriteRenderer sr;
@@ -12,8 +12,8 @@ public class KilobotMovement : MonoBehaviour
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
     private const float CommunicationRadius = 4f;
-    public IAgentInterface Agent;
-    public KilobotMessage CurrentMessage;
+    public IAgentInterface<TMessage> Agent;
+    public TMessage CurrentMessage;
 
 
     // Start is called before the first frame update
@@ -32,7 +32,7 @@ public class KilobotMovement : MonoBehaviour
         Collider2D[] circleHits = Physics2D.OverlapCircleAll(position, CommunicationRadius);
         
         // Create a list of messages from other Kilobots and their distances
-        List<Tuple<float, KilobotMessage>> messageList = new List<Tuple<float, KilobotMessage>>();
+        List<Tuple<float, TMessage>> messageList = new List<Tuple<float, TMessage>>();
         foreach (var hit in circleHits)
         {
             if (!hit.CompareTag("Kilobot") | (hit.gameObject == transform.gameObject))
@@ -48,14 +48,14 @@ public class KilobotMovement : MonoBehaviour
             
             // Determine the distance and get the message
             float distance = (otherPosition - position).magnitude;
-            KilobotMessage message = hit.GetComponent<KilobotMovement>().CurrentMessage;
+            TMessage message = hit.GetComponent<KilobotMovement<TMessage>>().CurrentMessage;
             
             // Add the distance and message to the list
-            messageList.Add(new Tuple<float, KilobotMessage>(distance, message));
+            messageList.Add(new Tuple<float, TMessage>(distance, message));
         }
         
         // Get an motion direction and a message from the agent
-        (Vector2 direction, float torque, KilobotMessage newMessage) = Agent.Act(messageList);
+        (Vector2 direction, float torque, TMessage newMessage) = Agent.Act(messageList);
         
         // Draw a line to indicate the deviation from the estimated and actual position
         if (Agent.PositionEstimated)

@@ -4,9 +4,9 @@ using UnityEngine;
 using Random = System.Random;
 
 
-namespace Agents
+namespace Agents.ShapeAssembly
 {
-    public class ShapeAssemblyAgent : IAgentInterface
+    public class ShapeAssemblyAgent : IAgentInterface<ShapeAssemblyMessage>
     {
         public enum State
         {
@@ -71,7 +71,7 @@ namespace Agents
             return _gradient.ToString();
         }
 
-        public Tuple<Vector2, float, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
+        public Tuple<Vector2, float, ShapeAssemblyMessage> Act(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             // Update the gradient value
             UpdateGradient(messageList);
@@ -100,15 +100,15 @@ namespace Agents
                     break;
             }
         
-            return new Tuple<Vector2, float, KilobotMessage>(motionDirection, torque, GetMessage());
+            return new Tuple<Vector2, float, ShapeAssemblyMessage>(motionDirection, torque, GetMessage());
         }
 
-        public KilobotMessage GetMessage()
+        public ShapeAssemblyMessage GetMessage()
         {
-            return new KilobotMessage(_gradient, _currentState, PositionEstimate, _randomID);
+            return new ShapeAssemblyMessage(_gradient, _currentState, PositionEstimate, _randomID);
         }
 
-        private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
+        private void UpdateGradient(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             // If the kilobot seeds the gradient computation, set the gradient to 0
             if (_gradientSeed)
@@ -120,7 +120,7 @@ namespace Agents
             // Determine the minimum gradient of neighbours within GradientDistance
             _gradient = Int32.MaxValue;
             bool isAnyInRange = false;
-            foreach ((float distance, KilobotMessage message) in messageList)
+            foreach ((float distance, ShapeAssemblyMessage message) in messageList)
             {
                 if (distance < GradientDistance && message.Gradient <= _gradient)
                 {
@@ -139,7 +139,7 @@ namespace Agents
             _gradient = 0;
         }
 
-        private void EstimatePosition(List<Tuple<float, KilobotMessage>> messageList)
+        private void EstimatePosition(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             // If the kilobot is a position seed, the estimate is already precise
             if (_positionSeed)
@@ -150,7 +150,7 @@ namespace Agents
         
             // Generate a list of stationary neighbors
             List<Tuple<float, Vector2>> statNeighbours = new List<Tuple<float, Vector2>>();
-            foreach ((float distance, KilobotMessage message) in messageList)
+            foreach ((float distance, ShapeAssemblyMessage message) in messageList)
             {
                 if (message.State == State.JoinedShape)
                 {
@@ -188,12 +188,12 @@ namespace Agents
             return new Tuple<Vector2, float>(Vector2.zero, 0);
         }
 
-        private Tuple<Vector2, float> ProcessWaitToMove(List<Tuple<float, KilobotMessage>> messageList)
+        private Tuple<Vector2, float> ProcessWaitToMove(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             Tuple<Vector2, float> action = new Tuple<Vector2, float>(Vector2.zero, 0);
         
             // Check if other visible bots are moving. If so, stay in this state
-            foreach ((_, KilobotMessage message) in messageList)
+            foreach ((_, ShapeAssemblyMessage message) in messageList)
             {
                 if (message.State == State.MoveWhileInside | message.State == State.MoveWhileOutside)
                 {
@@ -204,7 +204,7 @@ namespace Agents
         
             // Determine the maximum gradient of neighbors that are outside of the shape
             int maximumGradient = 0;
-            foreach ((_, KilobotMessage message) in messageList)
+            foreach ((_, ShapeAssemblyMessage message) in messageList)
             {
                 if (message.State != State.JoinedShape && message.Gradient > maximumGradient)
                 {
@@ -222,7 +222,7 @@ namespace Agents
             // If our gradient is equal the highest one, check who has the higher random ID
             if (maximumGradient == _gradient)
             {
-                foreach ((_, KilobotMessage message) in messageList)
+                foreach ((_, ShapeAssemblyMessage message) in messageList)
                 {
                     if (message.Gradient == maximumGradient && message.ID > _randomID)
                     {
@@ -235,7 +235,7 @@ namespace Agents
             return action;
         }
 
-        private Tuple<Vector2, float> ProcessMoveOutside(List<Tuple<float, KilobotMessage>> messageList)
+        private Tuple<Vector2, float> ProcessMoveOutside(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             if (IsInShape())
             {
@@ -244,7 +244,7 @@ namespace Agents
             return FollowEdge(messageList);
         }
     
-        private Tuple<Vector2, float> ProcessMoveInside(List<Tuple<float, KilobotMessage>> messageList)
+        private Tuple<Vector2, float> ProcessMoveInside(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             if (PositionEstimated && !IsInShape())
             {
@@ -254,7 +254,7 @@ namespace Agents
 
             float closestNeighborDistance = float.MaxValue;
             int closestNeighborGradient = Int32.MaxValue;
-            foreach ((float distance, KilobotMessage message) in messageList)
+            foreach ((float distance, ShapeAssemblyMessage message) in messageList)
             {
                 if (distance < closestNeighborDistance)
                 {
@@ -272,7 +272,7 @@ namespace Agents
             return FollowEdge(messageList);
         }
 
-        private Tuple<Vector2, float> FollowEdge(List<Tuple<float, KilobotMessage>> messageList)
+        private Tuple<Vector2, float> FollowEdge(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             float currentNearestNeighborDistance = float.MaxValue;
             foreach ((float distance, _) in messageList)

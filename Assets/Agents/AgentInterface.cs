@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Agents
 {
-    public interface IAgentInterface
+    public interface IAgentInterface<TMessage>
     {
-        KilobotMessage GetMessage();
-        Tuple<Vector2, float, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList);
+        TMessage GetMessage();
+        Tuple<Vector2, float, TMessage> Act(List<Tuple<float, TMessage>> messageList);
         bool PositionEstimated { get; }
         Vector2 PositionEstimate { get; }
         Color GetStateColor();

@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Agents.ShapeAssembly;
 using UnityEngine;
 
 namespace Agents
 {
-    public class PotentialMinimizationAgent : IAgentInterface
+    public class PotentialMinimizationAgent : IAgentInterface<ShapeAssemblyMessage>
     {
         private enum State
         {
@@ -22,12 +23,12 @@ namespace Agents
 
         private State _currentState;
 
-        public KilobotMessage GetMessage()
+        public ShapeAssemblyMessage GetMessage()
         {
             throw new NotImplementedException();
         }
 
-        public Tuple<Vector2, float, KilobotMessage> Act(List<Tuple<float, KilobotMessage>> messageList)
+        public Tuple<Vector2, float, ShapeAssemblyMessage> Act(List<Tuple<float, ShapeAssemblyMessage>> messageList)
         {
             throw new NotImplementedException();
         }
