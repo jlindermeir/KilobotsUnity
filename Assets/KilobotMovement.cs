@@ -12,7 +12,7 @@ public class KilobotMovement : MonoBehaviour
     private const float ForwardForce = 0.5f;
     private const float TorqueMag = 2f;
     private const float CommunicationRadius = 4f;
-    public IAgentInterface Agent = new ShapeAssemblyAgent();
+    public IAgentInterface Agent;
     public KilobotMessage CurrentMessage;
 
 

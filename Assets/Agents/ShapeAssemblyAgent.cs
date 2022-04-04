@@ -16,21 +16,7 @@ namespace Agents
             MoveWhileInside,
             JoinedShape
         }
-        private State _currentState;
-        public bool PositionSeed = false;
-        private int _gradient;
-        public bool GradientSeed = false;
-        private readonly float _randomID;
-        public Collider2D TargetShape;
         
-        public bool PositionEstimated { get; private set; }
-        public Vector2 PositionEstimate { get; set; } = Vector2.zero;
-
-        private const float GradientDistance = 3f;
-        private const float EdgeDistance = 1.75f;
-        private float _prevNearestNeighborDistance = float.MaxValue;
-        private int _startupTime = 15;
-
         private static readonly Dictionary<State, Color> StateColor = new Dictionary<State, Color>()
         {
             {State.Start, Color.gray},
@@ -39,10 +25,38 @@ namespace Agents
             {State.MoveWhileInside, Color.blue},
             {State.JoinedShape, Color.green}
         };
-    
-        public ShapeAssemblyAgent(State initialState = State.Start)
+        
+        private readonly bool _positionSeed = false;
+        private readonly bool _gradientSeed = false;
+        private readonly float _randomID;
+        private readonly Collider2D _targetShape;
+        
+        public bool PositionEstimated { get; private set; }
+        public Vector2 PositionEstimate { get; set; }
+        private State _currentState;
+        private int _gradient;
+
+        private const float GradientDistance = 3f;
+        private const float EdgeDistance = 1.75f;
+        private float _prevNearestNeighborDistance = float.MaxValue;
+        private int _startupTime = 15;
+        
+        public ShapeAssemblyAgent(Collider2D targetShape, Vector2 initialPositionEstimate, bool isPositionSeed = false, bool isGradientSeed = false)
         {
-            _currentState = initialState;
+            // Store whether the agent is a position or gradient seed
+            _gradientSeed = isGradientSeed;
+            _positionSeed = isPositionSeed;
+            
+            // Assign the target shape
+            _targetShape = targetShape;
+            
+            // Set the initial state
+            _currentState = isPositionSeed ? State.JoinedShape : State.Start;
+            
+            // Set the initial position estimate
+            PositionEstimate = initialPositionEstimate;
+            
+            // Set the random ID
             Random rng = new Random();
             _randomID = (float)rng.NextDouble();
         }
@@ -97,7 +111,7 @@ namespace Agents
         private void UpdateGradient(List<Tuple<float, KilobotMessage>> messageList)
         {
             // If the kilobot seeds the gradient computation, set the gradient to 0
-            if (GradientSeed)
+            if (_gradientSeed)
             {
                 _gradient = 0;
                 return;
@@ -128,7 +142,7 @@ namespace Agents
         private void EstimatePosition(List<Tuple<float, KilobotMessage>> messageList)
         {
             // If the kilobot is a position seed, the estimate is already precise
-            if (PositionSeed)
+            if (_positionSeed)
             {
                 PositionEstimated = true;
                 return;
@@ -296,7 +310,7 @@ namespace Agents
                 return false;
             }
 
-            Vector2 closestPoint = TargetShape.ClosestPoint(PositionEstimate);
+            Vector2 closestPoint = _targetShape.ClosestPoint(PositionEstimate);
             return closestPoint == PositionEstimate;
         }
     }
