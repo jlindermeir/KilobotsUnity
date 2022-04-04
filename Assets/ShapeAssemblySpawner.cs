@@ -1,7 +1,7 @@
 using Agents;
 using UnityEngine;
 
-public class KilobotSpawner : MonoBehaviour
+public class ShapeAssemblySpawner : MonoBehaviour
 {
     public GameObject kilobot;
     public Collider2D targetShape;
