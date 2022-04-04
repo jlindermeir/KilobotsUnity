@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Agents.ShapeAssembly;
 using UnityEngine;
 
-namespace Agents
+namespace Agents.PotentialMinimization
 {
     public class PotentialMinimizationAgent : IAgentInterface<ShapeAssemblyMessage>
     {
