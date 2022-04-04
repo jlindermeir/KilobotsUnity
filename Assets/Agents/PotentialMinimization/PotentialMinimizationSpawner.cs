@@ -8,8 +8,8 @@ namespace Agents.PotentialMinimization
     {
         public GameObject kilobot;
 
-        private static int NBots = 90;
-        private static int NFixedBots = 50;
+        private static int NBots = 150;
+        private static int NFixedBots = 75;
         private static float Radius = 20;
 
         void Start()
@@ -21,7 +21,7 @@ namespace Agents.PotentialMinimization
             // Spawn fixed bots
             for (int i = 0; i < NFixedBots; i++)
             {
-                Vector2 position = Quaternion.AngleAxis(360 / NFixedBots * i, Vector3.forward) * Vector3.up * Radius;
+                Vector2 position = Quaternion.AngleAxis(360f / NFixedBots * i, Vector3.forward) * Vector3.up * Radius;
                 PotentialMinimizationAgent agent = new PotentialMinimizationAgent(initialState: PotentialMinimizationAgent.State.Fixed);
 
                 GameObject newKilobot = Instantiate(kilobot, position, Quaternion.identity);

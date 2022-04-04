@@ -27,7 +27,7 @@ namespace Agents.PotentialMinimization
         
         private Vector2 _previousMotionDirection = Vector2.up;
         private float _previousEnergy = 0;
-        private static float _movementGasCost = 0.01f;
+        private static float _movementGasCost = 0.04f;
         private static float _gasGain = 0.1f;
 
         public PotentialMinimizationAgent(State initialState = State.Idle)
