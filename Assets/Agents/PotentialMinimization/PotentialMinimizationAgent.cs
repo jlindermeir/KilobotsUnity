@@ -22,11 +22,11 @@ namespace Agents.PotentialMinimization
         };
 
         private State _currentState;
-        private float _totalEnergy = 0;
+        private float _totalEnergy;
         private float _gas;
         
         private Vector2 _previousMotionDirection = Vector2.up;
-        private float _previousEnergy = 0;
+        private float _previousEnergy;
         private static float _movementGasCost = 0.04f;
         private static float _gasGain = 0.1f;
 
@@ -145,7 +145,7 @@ namespace Agents.PotentialMinimization
 
         public string GetDisplayText()
         {
-            return String.Format("", _gas);
+            return $"{_gas:0.00}";
         }
     }
 }

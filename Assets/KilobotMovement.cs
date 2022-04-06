@@ -9,7 +9,7 @@ public class KilobotMovement<TMessage> : MonoBehaviour
     public SpriteRenderer sr;
     public TextMesh tm;
 
-    private const float ForwardForce = 0.5f;
+    private const float ForwardForce = 2f;
     private const float TorqueMag = 2f;
     private const float CommunicationRadius = 4f;
     public IAgentInterface<TMessage> Agent;
