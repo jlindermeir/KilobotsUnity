@@ -98,8 +98,18 @@ namespace Agents.PotentialMinimization
                 _gas = 0;
                 _currentState = State.Idle;
                 return new Tuple<Vector2, float>(Vector2.zero, 0);
-            } 
+            }
             
+            // If a moving bot is in range an has higher gas, switch to idle
+            foreach (var (_, message) in messageList)
+            {
+                if (message.State == State.Moving && message.Gas > _gas)
+                {
+                    _currentState = State.Idle;
+                    return new Tuple<Vector2, float>(Vector2.zero, 0);
+                }
+            }
+
             // If the previous energy is higher than the current one, keep moving in the same direction, else move randomly
             Vector2 direction = (_previousEnergy > _totalEnergy) ? _previousMotionDirection : Random.insideUnitCircle;
             
