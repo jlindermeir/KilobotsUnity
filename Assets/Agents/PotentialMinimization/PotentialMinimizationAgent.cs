@@ -143,6 +143,8 @@ namespace Agents.PotentialMinimization
             {
                 _totalEnergy += PotentialFunction(distance);
             }
+
+            _totalEnergy /= nNeighbors;
         }
 
         public bool PositionEstimated => false;
